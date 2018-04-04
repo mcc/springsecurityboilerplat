@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationDetailsSource;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -18,7 +19,10 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler;
+import org.springframework.security.web.authentication.WebAuthenticationDetails;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
+
+import javax.servlet.http.HttpServletRequest;
 
 @Configuration
 @EnableGlobalMethodSecurity(securedEnabled = true, prePostEnabled = true)
@@ -74,7 +78,7 @@ public class SecurityConfig {
                 .authenticated()
             .and()
                 .formLogin()
-                .authenticationDetailsSource(SampleWebAuthenticationDetails::new)
+                .authenticationDetailsSource(authenticationDetailsSource())
                 .loginPage("/login").failureUrl("/loginFailure").loginProcessingUrl("/api/login").permitAll()
                 .successForwardUrl("/home").permitAll()
                 //.successHandler(authenticationSuccessHandler)
@@ -82,6 +86,19 @@ public class SecurityConfig {
             .and()
                 .logout();
             //@formatter:on
+        }
+
+        private AuthenticationDetailsSource<HttpServletRequest, WebAuthenticationDetails> authenticationDetailsSource() {
+
+            return new AuthenticationDetailsSource<HttpServletRequest, WebAuthenticationDetails>() {
+
+                @Override
+                public WebAuthenticationDetails buildDetails(
+                        HttpServletRequest request) {
+                    return new SampleWebAuthenticationDetails(request);
+                }
+
+            };
         }
 
         @Bean
