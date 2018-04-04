@@ -32,16 +32,25 @@ public class SampleUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        return new SampleUserDetails(this.sampleUserHashSet.get(username));
+        SampleUser sampleUser = this.sampleUserHashSet.get(username);
+        if(sampleUser!=null) {
+            return new SampleUserDetails(sampleUser);
+        } else {
+            throw new UsernameNotFoundException("username: " + username + " not found");
+        }
     }
 
     public void resetFailAttempts(String username) {
         SampleUser sampleUser = this.sampleUserHashSet.get(username);
-        sampleUser.setFailedLoginAttempt(0);
+        if(sampleUser!=null) {
+            sampleUser.setFailedLoginAttempt(0);
+        }
     }
 
     public void updateFailAttempts(String username) {
         SampleUser sampleUser = this.sampleUserHashSet.get(username);
-        sampleUser.setFailedLoginAttempt(sampleUser.getFailedLoginAttempt()+1);
+        if(sampleUser!=null) {
+            sampleUser.setFailedLoginAttempt(sampleUser.getFailedLoginAttempt() + 1);
+        }
     }
 }

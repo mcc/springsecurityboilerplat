@@ -18,6 +18,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler;
+import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 
 @Configuration
 @EnableGlobalMethodSecurity(securedEnabled = true, prePostEnabled = true)
@@ -62,8 +63,11 @@ public class SecurityConfig {
             //@formatter:off
             http
                 //.csrf().disable()
+                .csrf()
+                .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()).ignoringAntMatchers("/api/login")
+            .and()
                 .exceptionHandling()
-                .authenticationEntryPoint(restAuthenticationEntryPoint)
+                //.authenticationEntryPoint(restAuthenticationEntryPoint)
             .and()
                 .authorizeRequests()
                 .anyRequest()
@@ -71,9 +75,10 @@ public class SecurityConfig {
             .and()
                 .formLogin()
                 .authenticationDetailsSource(SampleWebAuthenticationDetails::new)
-                .loginPage("/login").failureUrl("/login?error").permitAll()
-                .successHandler(authenticationSuccessHandler)
-                .failureHandler(authenticationFailureHandler)
+                .loginPage("/login").failureUrl("/loginFailure").loginProcessingUrl("/api/login").permitAll()
+                .successForwardUrl("/home").permitAll()
+                //.successHandler(authenticationSuccessHandler)
+                //.failureHandler(authenticationFailureHandler)
             .and()
                 .logout();
             //@formatter:on

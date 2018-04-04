@@ -1,6 +1,8 @@
 package hk.mcc.sample.spring.security;
 
 import hk.mcc.sample.spring.service.SampleUserDetailsService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.DisabledException;
@@ -11,13 +13,14 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetails;
 
 public class SampleAuthenticationProvider extends DaoAuthenticationProvider {
-
+    private static final Logger LOGGER = LoggerFactory.getLogger(SampleAuthenticationProvider.class);
     @Autowired
     SampleUserDetailsService sampleUserDetailsService;
 
     @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
         try {
+            LOGGER.info("authenticate");
             Authentication authenticate = super.authenticate(authentication);
             sampleUserDetailsService.resetFailAttempts(authentication.getName());
             return authenticate;
