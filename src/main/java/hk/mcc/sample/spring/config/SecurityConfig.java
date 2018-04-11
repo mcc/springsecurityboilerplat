@@ -21,6 +21,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler;
 import org.springframework.security.web.authentication.WebAuthenticationDetails;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -62,13 +65,34 @@ public class SecurityConfig {
             builder.ignoring().antMatchers("/robots.txt", "/**/*.png");
         }
 
+
+        CorsConfigurationSource corsConfigurationSource = new CorsConfigurationSource() {
+            @Override
+            public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
+                CorsConfiguration corsConfiguration = new CorsConfiguration();
+                corsConfiguration.applyPermitDefaultValues();
+//                corsConfiguration.addAllowedOrigin("http://127.0.0.1:4200");
+//                corsConfiguration.addAllowedMethod("POST");
+//                corsConfiguration.addAllowedMethod("GET");
+//                corsConfiguration.addAllowedMethod("OPTIONS");
+                corsConfiguration.setAllowCredentials(true);
+                LOGGER.info("corsConfigurationSource");
+                //corsConfiguration.applyPermitDefaultValues();
+                return corsConfiguration;
+                //return corsConfiguration;
+            }
+        };
+
         @Override
         protected void configure(HttpSecurity http) throws Exception {
+
+
+
             //@formatter:off
             http
-                //.csrf().disable()
-                .csrf()
-                .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()).ignoringAntMatchers("/api/login")
+                .csrf().disable().cors().configurationSource(corsConfigurationSource)
+                //.csrf()
+                //.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()).ignoringAntMatchers("/api/login")
             .and()
                 .exceptionHandling()
                 //.authenticationEntryPoint(restAuthenticationEntryPoint)
@@ -77,14 +101,17 @@ public class SecurityConfig {
                 .anyRequest()
                 .authenticated()
             .and()
-                .formLogin()
-                .authenticationDetailsSource(authenticationDetailsSource())
+                .formLogin().successForwardUrl("/loginSuccess")
+                .authenticationDetailsSource(authenticationDetailsSource())//.authenticationDetailsSource(SampleWebAuthenticationDetails::new)
                 .loginPage("/login").failureUrl("/loginFailure").loginProcessingUrl("/api/login").permitAll()
-                .successForwardUrl("/home").permitAll()
+                .successForwardUrl("/loginSuccess").permitAll()
                 //.successHandler(authenticationSuccessHandler)
                 //.failureHandler(authenticationFailureHandler)
             .and()
                 .logout();
+            //http.cors().configurationSource(request -> new CorsConfiguration().applyPermitDefaultValues());
+
+
             //@formatter:on
         }
 
