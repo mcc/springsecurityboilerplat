@@ -35,6 +35,18 @@ public class LoginController {
         return "login";
     }
 
+    @RequestMapping(value = "/loginSuccess")
+    public ResponseEntity<?> loginSuccess() {
+        Exception lastException = (Exception) context.getSession().getAttribute("SPRING_SECURITY_LAST_EXCEPTION");
+        if(lastException!=null){
+            LOGGER.info(lastException.getMessage());
+            return new ResponseEntity(lastException.getMessage(), HttpStatus.UNAUTHORIZED);
+        } else {
+
+            return new ResponseEntity("{ \"authMessage\": \"SUCCEEDED\"}", HttpStatus.ACCEPTED);
+        }
+    }
+
     @RequestMapping(value = "/loginFailure")
     public ResponseEntity<?> loginFailure() {
         Exception lastException = (Exception) context.getSession().getAttribute("SPRING_SECURITY_LAST_EXCEPTION");
